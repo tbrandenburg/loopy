@@ -6,6 +6,14 @@ import sys
 # FluidSynth Setup
 SOUNDFONT_PATH = 'sf2/GeneralUser-GS.sf2'  # Ersetze dies mit dem Pfad zu deiner SoundFont-Datei
 
+# Wähle den richtigen FluidSynth-Treiber basierend auf dem Betriebssystem
+if sys.platform == "linux" or sys.platform == "linux2":
+    DRIVER = "alsa"  # Linux: ALSA oder PulseAudio
+elif sys.platform == "darwin":
+    DRIVER = "coreaudio"  # macOS: CoreAudio
+else:
+    DRIVER = "default"  # Standardtreiber für andere Systeme
+
 # Funktion zum Spielen eines einzelnen Schlages
 def play_beat(is_accented, fs, note=60):
     """Spielt einen Schlag (Beat) ab. Wenn 'is_accented' wahr ist, gibt es einen Akzent auf dem Schlag."""
@@ -37,7 +45,7 @@ def start_metronome():
 
     # FluidSynth Setup
     fs = fluidsynth.Synth()
-    fs.start(driver="alsa")  # Oder "pulseaudio", je nach System
+    fs.start(driver=DRIVER)  # Oder "pulseaudio", je nach System
     sfid = fs.sfload(SOUNDFONT_PATH)  # Lade SoundFont-Datei
     fs.program_select(0, sfid, 0, 0)  # Wähle ein Programm (Instrument) aus
 

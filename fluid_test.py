@@ -1,9 +1,18 @@
 import mido
 import fluidsynth
 import threading
+import sys
 
 # FluidSynth Setup
 SOUNDFONT_PATH = 'sf2/GeneralUser-GS.sf2'  # Ersetze dies mit dem Pfad zu deiner SoundFont-Datei
+
+# Wähle den richtigen FluidSynth-Treiber basierend auf dem Betriebssystem
+if sys.platform == "linux" or sys.platform == "linux2":
+    DRIVER = "alsa"  # Linux: ALSA oder PulseAudio
+elif sys.platform == "darwin":
+    DRIVER = "coreaudio"  # macOS: CoreAudio
+else:
+    DRIVER = "default"  # Standardtreiber für andere Systeme
 
 # Spielt eine Note ab und verwaltet die aktiven Noten
 def play_midi_message(message, fs, active_notes):
@@ -49,7 +58,7 @@ def read_all_midi_ports(fs):
 if __name__ == "__main__":
     # Starte FluidSynth
     fs = fluidsynth.Synth()
-    fs.start(driver="alsa")  # Oder "pulseaudio", je nach System
+    fs.start(driver=DRIVER)  # Wähle den Treiber basierend auf dem Betriebssystem
     sfid = fs.sfload(SOUNDFONT_PATH)  # Lade SoundFont-Datei
     fs.program_select(0, sfid, 0, 0)  # Wähle ein Programm (Instrument) aus
 

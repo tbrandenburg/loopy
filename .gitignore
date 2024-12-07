@@ -163,4 +163,4 @@ cython_debug/
 
 # User
 *.sf2
-
+.DS_Store
