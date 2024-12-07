@@ -9,6 +9,7 @@ MIDI_BASE_NOTE = 69     # Referenznote (A4)
 
 # Dictionary zur Speicherung vorab erzeugter Sounds
 sound_cache = {}
+active_sounds = {}  # Speichert aktive Sounds für jede Note
 
 def midi_note_to_frequency(note):
     """Berechnet die Frequenz einer MIDI-Note."""
@@ -26,17 +27,29 @@ def preload_sounds():
     print("Preloading sounds...")
     for note in range(128):  # MIDI-Notenbereich 0–127
         frequency = midi_note_to_frequency(note)
-        wave = generate_sine_wave(frequency, duration=1.0)
+        wave = generate_sine_wave(frequency, duration=5.0)  # 5 Sekunden Puffer
         sound_cache[note] = pygame.sndarray.make_sound(wave)
     print("Sounds preloaded.")
 
-def play_note(note):
-    """Spielt die vorab erzeugte Sinuswelle für die gegebene Note."""
+def play_note_start(note):
+    """Startet den Ton für die gegebene Note."""
+    global active_sounds
     if note in sound_cache:
         sound = sound_cache[note]
-        sound.play()
+        channel = sound.play(-1)  # Wiederhole den Sound unendlich (bis zum Stop)
+        active_sounds[note] = channel  # Speichere den Kanal für diese Note
+        print(f"Note on: {note}")
     else:
         print(f"Note {note} not preloaded!")
+
+def play_note_stop(note):
+    """Stoppt den Ton für die gegebene Note."""
+    global active_sounds
+    if note in active_sounds:
+        channel = active_sounds[note]
+        channel.stop()  # Stoppt die Wiedergabe
+        del active_sounds[note]  # Entferne die Note aus den aktiven Sounds
+        print(f"Note off: {note}")
 
 def read_midi_input(port_name):
     """Liest MIDI-Eingaben von einem spezifischen MIDI-Port."""
@@ -44,9 +57,9 @@ def read_midi_input(port_name):
         print(f"Listening for MIDI input on {port_name}...")
         for message in port:
             if message.type == "note_on" and message.velocity > 0:
-                play_note(message.note)
+                play_note_start(message.note)
             elif message.type == "note_off" or (message.type == "note_on" and message.velocity == 0):
-                print(f"Note off: {message.note}")
+                play_note_stop(message.note)
 
 def read_all_midi_ports():
     """Liest MIDI-Daten von allen verfügbaren Ports aus."""
