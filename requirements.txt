@@ -1,6 +1,7 @@
 mido
 python-rtmidi
-pyalsaaudio
+pyalsaaudio; sys_platform == 'linux'
+sounddevice; sys_platform == 'darwin'
 pygame
 numpy
 pyfluidsynth
