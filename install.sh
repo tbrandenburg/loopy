@@ -1,3 +1,4 @@
 #!/bin/sh
-sudo apt install alsa-utils aconnect alsa-tools
+sudo apt update
+sudo apt install alsa-utils
 
