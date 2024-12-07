@@ -2,4 +2,4 @@ mido
 python-rtmidi
 pyalsaaudio
 pygame
-
+numpy
