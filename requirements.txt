@@ -1,3 +1,5 @@
 mido
 python-rtmidi
 pyalsaaudio
+pygame
+
