@@ -2,7 +2,7 @@ import mido
 import fluidsynth
 
 # FluidSynth Setup
-SOUNDFONT_PATH = 'path/to/your/soundfont.sf2'  # Ersetze dies mit dem Pfad zu deiner SoundFont-Datei
+SOUNDFONT_PATH = 'sf2/GeneralUser-GS.sf2'  # Ersetze dies mit dem Pfad zu deiner SoundFont-Datei
 
 def play_midi_message(message, fs, active_notes):
     """Spielt die MIDI-Nachricht ab und verwaltet die aktiven Noten."""
