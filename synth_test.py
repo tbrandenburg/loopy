@@ -1,6 +1,7 @@
 import mido
 import threading
-import pygame.mixer
+import numpy as np
+import pygame
 import time
 
 # Konfiguration für Tonhöhen
@@ -11,6 +12,12 @@ def midi_note_to_frequency(note):
     """Berechnet die Frequenz einer MIDI-Note."""
     return BASE_FREQUENCY * (2 ** ((note - MIDI_BASE_NOTE) / 12))
 
+def generate_sine_wave(frequency, duration, sample_rate=44100, amplitude=32767):
+    """Erzeugt eine Sinuswelle mit gegebener Frequenz und Dauer."""
+    t = np.linspace(0, duration, int(sample_rate * duration), endpoint=False)
+    wave = (amplitude * np.sin(2 * np.pi * frequency * t)).astype(np.int16)
+    return wave
+
 def play_note(note, duration=0.5):
     """Erzeugt und spielt einen Ton für die gegebene Note."""
     frequency = midi_note_to_frequency(note)
@@ -20,17 +27,9 @@ def play_note(note, duration=0.5):
     if not pygame.mixer.get_init():
         pygame.mixer.init(frequency=44100, size=-16, channels=1, buffer=512)
     
-    # Erzeuge eine Sinuswelle als Sound
-    sample_rate = 44100
-    samples = (
-        int((2**15 - 1) * pygame.sndarray.make_sound(
-            pygame.sndarray.array(
-                [[int((2**15 - 1) * pygame.mixer.Sound.sin(frequency * t / sample_rate))
-                  for t in range(int(sample_rate * duration))]]
-            )
-        ))
-    )
-    sound = pygame.mixer.Sound(samples)
+    # Erzeuge die Sinuswelle
+    wave = generate_sine_wave(frequency, duration)
+    sound = pygame.sndarray.make_sound(wave)
     sound.play()
     time.sleep(duration)
     sound.stop()
@@ -70,4 +69,3 @@ if __name__ == "__main__":
 
     print("\nStarte das Lesen von allen MIDI-Ports...")
     read_all_midi_ports()
-
