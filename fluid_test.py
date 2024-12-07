@@ -2,29 +2,28 @@ import mido
 import fluidsynth
 
 # FluidSynth Setup
-SOUNDFONT_PATH = 'sf2/GeneralUser-GS.sf2'  # Ersetze dies mit dem Pfad zu deiner SoundFont-Datei
-MIDI_BASE_NOTE = 69  # A4 (MIDI-Note 69)
+SOUNDFONT_PATH = 'path/to/your/soundfont.sf2'  # Ersetze dies mit dem Pfad zu deiner SoundFont-Datei
 
-def midi_note_to_frequency(note):
-    """Berechnet die Frequenz einer MIDI-Note."""
-    base_frequency = 440.0  # A4 (MIDI-Note 69)
-    return base_frequency * (2 ** ((note - MIDI_BASE_NOTE) / 12))
-
-def play_midi_message(message, fs):
-    """Spielt die MIDI-Nachricht ab."""
+def play_midi_message(message, fs, active_notes):
+    """Spielt die MIDI-Nachricht ab und verwaltet die aktiven Noten."""
     if message.type == "note_on" and message.velocity > 0:
-        print(f"Note on: {message.note}, Velocity: {message.velocity}")
-        fs.noteon(0, message.note, message.velocity)
+        if message.note not in active_notes:
+            print(f"Note on: {message.note}, Velocity: {message.velocity}")
+            fs.noteon(0, message.note, message.velocity)
+            active_notes.add(message.note)
     elif message.type in ["note_off", "note_on"] and message.velocity == 0:
-        print(f"Note off: {message.note}")
-        fs.noteoff(0, message.note)
+        if message.note in active_notes:
+            print(f"Note off: {message.note}")
+            fs.noteoff(0, message.note)
+            active_notes.remove(message.note)
 
 def read_midi_input(port_name, fs):
     """Liest MIDI-Eingaben von einem spezifischen MIDI-Port und spielt sie ab."""
+    active_notes = set()  # Set, um alle aktiven Noten zu verfolgen
     with mido.open_input(port_name) as port:
         print(f"Listening for MIDI input on {port_name}...")
         for message in port:
-            play_midi_message(message, fs)
+            play_midi_message(message, fs, active_notes)
 
 if __name__ == "__main__":
     # Starte FluidSynth
@@ -44,4 +43,3 @@ if __name__ == "__main__":
 
     # Lese MIDI-Daten von dem ausgewählten Port
     read_midi_input(selected_port, fs)
-
