@@ -3,3 +3,4 @@ python-rtmidi
 pyalsaaudio
 pygame
 numpy
+pyfluidsynth
