@@ -18,42 +18,37 @@ synth_id = seq.register_fluidsynth(fs)
 
 # Setze die BPM (Beats pro Minute)
 bpm = 120
-# Berechne die Dauer eines Schritts in Ticks (hier gehen wir von 480 Ticks pro Schlag aus)
 ticks_per_beat = 480
-step_duration = (60 / bpm) * ticks_per_beat / 4  # 4 Schritte pro Schlag (16tel-Noten)
+step_duration = int((60 / bpm) * ticks_per_beat / 4)  # 4 Schritte pro Schlag (16tel-Noten)
 
-# 32 Schritte (also ein Pattern mit 32 Schritten)
-num_steps = 32
-note_on_velocity = 80  # Lautstärke der Note
-note_off_velocity = 0  # Lautstärke zum Stoppen der Note
-
-# Beispiel für ein 32-Schritte-Pattern (z.B. eine einfache Melodie)
-pattern = [60, 62, 64, 65, 67, 69, 71, 72, 74, 76, 77, 79, 81, 83, 84, 86,
-           88, 90, 91, 93, 95, 96, 98, 100, 102, 104, 105, 107, 109, 111, 112, 114]
-
-# Funktion, um die 32 Schritte zu laden
-def load_sequence(start_time):
-    for step in range(num_steps):
-        note = pattern[step]
-        seq.note_on(int(start_time + step * step_duration), 0, note, note_on_velocity, dest=synth_id)  # Note einschalten
-        seq.note_off(int(start_time + (step + 1) * step_duration), 0, note, note_off_velocity, dest=synth_id)  # Note ausschalten
-
+# Teste eine Callback-Funktion
 def seq_callback(time, event, seq, data):
-    print('callback called!')
+    print(f"Callback ausgelöst: time={time}, event={event}, data={data}")
 
-# Setze den Sequencer so, dass er die Sequenz wiederholt
+# Registriere das Callback im Sequencer
+callback_id = seq.register_client("myCallback", seq_callback)
+
+# Planen und Testen
 try:
-    print("Starting sequencer...")
-    
+    print(f"Testing Synthesizer directly (Tick {seq.get_tick()})...")
+    fs.noteon(0, 60, 100)  # Note C4 anspielen
+    time.sleep(1)
+    fs.noteoff(0, 60)      # Note C4 stoppen
+
     # Feste Startzeit für die Sequenz
-    initial_start_time = seq.get_tick()  # Die Startzeit in Ticks (relativ zu einem Referenzzeitpunkt)
+    initial_start_time = seq.get_tick()
 
-    callback_id = seq.register_client("myCallback", seq_callback)
+    print("Adding scheduled events...")
+    seq.note_on(initial_start_time + 500, 0, 60, 100, dest=synth_id)
+    seq.note_off(initial_start_time + 1000, 0, 60, 80, dest=synth_id)
 
-    seq.timer(initial_start_time, dest=callback_id)
+    print("Adding timer events...")
+    seq.timer(initial_start_time + 1500, dest=callback_id)
 
-    seq.note_on(initial_start_time + 500, 0, 60, 80, dest=synth_id)
-
+    print("Waiting for scheduled events...")
     time.sleep(5)
+    
 except KeyboardInterrupt:
     print("Sequencer gestoppt.")
+finally:
+    fs.delete()
