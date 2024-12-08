@@ -22,15 +22,10 @@ sfid = fs.sfload(soundfont)
 fs.program_select(0, sfid, 0, 0)
 
 # Initialisiere den Sequencer
-seq = fluidsynth.Sequencer()
+seq = fluidsynth.Sequencer(use_system_timer=False)
 
 # Registriere den Synthesizer beim Sequencer
 synth_id = seq.register_fluidsynth(fs)
-
-# Setze die BPM (Beats pro Minute)
-bpm = 120
-ticks_per_beat = 480
-step_duration = int((60 / bpm) * ticks_per_beat / 4)  # 4 Schritte pro Schlag (16tel-Noten)
 
 # Teste eine Callback-Funktion
 def seq_callback(time, event, seq, data):
