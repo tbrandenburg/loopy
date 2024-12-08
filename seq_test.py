@@ -1,9 +1,20 @@
 import fluidsynth
 import time
+import sys
+
+# Wähle den richtigen FluidSynth-Treiber basierend auf dem Betriebssystem
+if sys.platform == "linux" or sys.platform == "linux2":
+    DRIVER = "alsa"  # Linux: ALSA oder PulseAudio
+elif sys.platform == "darwin":
+    DRIVER = "coreaudio"  # macOS: CoreAudio
+elif sys.platform == "win32":
+    DRIVER = "dsound"  # Windows: DirectSound
+else:
+    DRIVER = "file"  # Fallback-Treiber
 
 # Initialisiere FluidSynth
 fs = fluidsynth.Synth()
-fs.start()
+fs.start(driver=DRIVER)
 
 # Lade ein SoundFont (z.B. GeneralUser SoundFont)
 soundfont = "sf2/GeneralUser-GS.sf2"
