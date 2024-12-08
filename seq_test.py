@@ -41,7 +41,7 @@ callback_id = seq.register_client("myCallback", seq_callback)
 
 # Planen und Testen
 try:
-    print(f"Testing Synthesizer directly (Tick {seq.get_tick()})...")
+    print(f"Testing Synthesizer directly (at {seq.get_tick()})...")
     fs.noteon(0, 60, 100)  # Note C4 anspielen
     time.sleep(1)
     fs.noteoff(0, 60)      # Note C4 stoppen
@@ -49,15 +49,16 @@ try:
     # Feste Startzeit für die Sequenz
     initial_start_time = seq.get_tick()
 
-    print("Adding scheduled events...")
-    seq.note_on(initial_start_time + 500, 0, 60, 100, dest=synth_id)
-    seq.note_off(initial_start_time + 1000, 0, 60, 80, dest=synth_id)
+    print(f"Adding scheduled events (at {seq.get_tick()})...")
+    seq.note_on(seq.get_tick() + 500, 0, 60, 100, dest=synth_id)
+    seq.note_off(seq.get_tick() + 1000, 0, 60, 80, dest=synth_id)
 
-    print("Adding timer events...")
-    seq.timer(initial_start_time + 1500, dest=callback_id)
+    print(f"Adding timer events (at {seq.get_tick()})...")
+    seq.timer(seq.get_tick() + 1500, dest=callback_id)
 
-    print("Waiting for scheduled events...")
+    print(f"Waiting for scheduled events (at {seq.get_tick()})...")
     time.sleep(5)
+    print(f"Stopping at {seq.get_tick()}...")
     
 except KeyboardInterrupt:
     print("Sequencer gestoppt.")
