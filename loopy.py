@@ -17,10 +17,9 @@ class InstrumentRegistry:
     
     def __init__(self, project):
         self._registry = {}  # Speichert Informationen über Instrumente und deren SoundFonts
-        self._project = project  # Verweis auf das Projekt, um auf FluidSynth zuzugreifen
         self._synth_registry = {}  # Speichert FluidSynth-Instanzen für jedes Instrument
 
-    def register_instrument(self, instrument_name, soundfont_path):
+    def register_instrument(self, instrument_name, soundfont_path, bank = 0, preset = 0):
         """Registriert ein Instrument mit einem SoundFont und erstellt die Synth-Instanz."""
         self._registry[instrument_name] = soundfont_path
         
@@ -28,7 +27,7 @@ class InstrumentRegistry:
         fs = fluidsynth.Synth()
         fs.start(driver=DRIVER)  # Startet FluidSynth mit dem richtigen Treiber
         sfid = fs.sfload(soundfont_path)  # Lade das SoundFont
-        fs.program_select(0, sfid, 0, 0)  # Wähle das erste Programm (Instrument) aus, typischerweise 0
+        fs.program_select(0, sfid, bank, preset)  # Wähle das erste Programm (Instrument) aus, typischerweise 0
         self._synth_registry[instrument_name] = fs
 
     def get_instrument(self, instrument_name):
