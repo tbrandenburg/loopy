@@ -9,8 +9,10 @@ if sys.platform == "linux" or sys.platform == "linux2":
     DRIVER = "alsa"  # Linux: ALSA oder PulseAudio
 elif sys.platform == "darwin":
     DRIVER = "coreaudio"  # macOS: CoreAudio
+elif sys.platform == "win32":
+    DRIVER = "dsound"  # Windows: DirectSound
 else:
-    DRIVER = "default"  # Standardtreiber für andere Systeme
+    DRIVER = "file"  # Fallback-Treiber
 
 class InstrumentRegistry:
     """Verwaltet Instrumenten-IDs und ordnet sie den FluidSynth-SoundFonts zu."""
