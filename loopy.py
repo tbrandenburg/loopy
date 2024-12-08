@@ -18,23 +18,47 @@ class InstrumentRegistry:
     """Verwaltet Instrumenten-IDs und ordnet sie den FluidSynth-SoundFonts zu."""
     
     def __init__(self, project):
-        self._registry = {}  # Speichert Informationen über Instrumente und deren SoundFonts
-        self._synth_registry = {}  # Speichert FluidSynth-Instanzen für jedes Instrument
+        self._registry = {}  # Speichert Informationen über Instrumente und deren Synth-Instanzen
+        self._soundfont_cache = {}  # Speichert geladene SoundFonts (Pfad -> sfid)
+        self._fs = fluidsynth.Synth()
+        self._fs.start(driver=DRIVER)  # Startet FluidSynth mit dem richtigen Treiber
 
-    def register_instrument(self, instrument_name, soundfont_path, bank = 0, preset = 0):
+    def get_synth(self):
+        return self._fs
+
+    def register_instrument(self, instrument_name, soundfont_path, bank=0, preset=0):
         """Registriert ein Instrument mit einem SoundFont und erstellt die Synth-Instanz."""
-        self._registry[instrument_name] = soundfont_path
         
-        # Erstelle und konfiguriere die Synth-Instanz für das Instrument
-        fs = fluidsynth.Synth()
-        fs.start(driver=DRIVER)  # Startet FluidSynth mit dem richtigen Treiber
-        sfid = fs.sfload(soundfont_path)  # Lade das SoundFont
-        fs.program_select(0, sfid, bank, preset)  # Wähle das erste Programm (Instrument) aus, typischerweise 0
-        self._synth_registry[instrument_name] = fs
+        # Prüfen, ob der SoundFont bereits geladen wurde
+        if soundfont_path in self._soundfont_cache:
+            sfid = self._soundfont_cache[soundfont_path]  # Verwende die vorhandene sfid
+        else:
+            sfid = self._fs.sfload(soundfont_path)  # Lade den SoundFont
+            self._soundfont_cache[soundfont_path] = sfid  # Speichere die sfid im Cache
+
+        # Wähle das Instrument (Programm) auf einem neuen Kanal
+        # Finde den nächsten freien Kanal
+        available_channel = len(self._registry) % 16  # Einfacher Round-Robin-Ansatz
+
+        # Program auswählen und registrieren
+        self._fs.program_select(available_channel, sfid, bank, preset)
+        self._registry[instrument_name] = {
+            "channel": available_channel,
+            "sfid": sfid,
+            "bank": bank,
+            "preset": preset
+        }
 
     def get_instrument(self, instrument_name):
-        """Gibt die Synth-Instanz für das Instrument zurück."""
-        return self._synth_registry.get(instrument_name)
+        """Gibt die FluidSynth-Instanz und den Kanal des Instruments zurück."""
+        instrument = self._registry.get(instrument_name)
+        if instrument:
+            return self._fs, instrument["channel"]
+        return None, None
+
+    def list_registered_instruments(self):
+        """Gibt eine Liste aller registrierten Instrumente zurück."""
+        return list(self._registry.keys())
 
 class InstrumentChannel:
     """Abstrakte Basisklasse für alle Instrumentkanäle."""
@@ -44,7 +68,7 @@ class InstrumentChannel:
         self._instrument_name = instrument_name
         self._volume = volume
         self._instrument_registry = project.get_instrument_registry()  # Zugriff auf die Registry
-        self._synth = self._instrument_registry.get_instrument(instrument_name)  # Hole die Synth-Instanz
+        self._synth, self._channel = self._instrument_registry.get_instrument(instrument_name)  # Hole die Synth-Instanz
         self._is_playing = False
 
     def set_instrument(self, instrument_name):
@@ -97,7 +121,7 @@ class FluidMidiChannel(InstrumentChannel):
         if not self._is_playing:
             print(f"Beende das Abhören von MIDI-Daten auf Kanal {self._instrument_name}...")
             for note in self._active_notes:
-                self._synth.noteoff(0, note)
+                self._synth.noteoff(self._channel, note)
             self._active_notes.clear()
 
     def _play_midi_message(self, message):
@@ -105,12 +129,12 @@ class FluidMidiChannel(InstrumentChannel):
         if message.type == "note_on" and message.velocity > 0:
             if message.note not in self._active_notes:
                 print(f"Note on: {message.note}, Velocity: {message.velocity}")
-                self._synth.noteon(0, message.note, message.velocity)
+                self._synth.noteon(self._channel, message.note, message.velocity)
                 self._active_notes.add(message.note)
         elif message.type in ["note_off", "note_on"] and message.velocity == 0:
             if message.note in self._active_notes:
                 print(f"Note off: {message.note}")
-                self._synth.noteoff(0, message.note)
+                self._synth.noteoff(self._channel, message.note)
                 self._active_notes.remove(message.note)
 
     def _read_midi_input(self):
@@ -145,9 +169,9 @@ class MetronomeChannel(InstrumentChannel):
                 velocity = self.get_volume()  # Normale Lautstärke
 
             # Spiele die Note für die Dauer von seconds_per_beat
-            self._synth.noteon(0, note, velocity)
+            self._synth.noteon(self._channel, note, velocity)
             time.sleep(self._project.get_seconds_per_beat())  # Die Dauer der Note entspricht der Länge eines Beats
-            self._synth.noteoff(0, note)
+            self._synth.noteoff(self._channel, note)
 
 class Project:
     """Das Projekt, das die Taktlogik verwaltet und Kanäle steuert."""
@@ -214,8 +238,8 @@ class Project:
 projekt = Project(bpm=120, ticks_per_measure=4)
 
 # Instrumente registrieren
-projekt.get_instrument_registry().register_instrument("Piano", "sf2/GeneralUser-GS.sf2")
-projekt.get_instrument_registry().register_instrument("Metronome", "sf2/GeneralUser-GS.sf2")
+projekt.get_instrument_registry().register_instrument("Piano", "sf2/GeneralUser-GS.sf2", 0, 0)
+projekt.get_instrument_registry().register_instrument("Metronome", "sf2/GeneralUser-GS.sf2", 0, 0)
 
 # Kanäle erstellen
 for port_name in mido.get_input_names():
