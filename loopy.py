@@ -3,6 +3,10 @@ import threading
 import time
 import fluidsynth
 import sys
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Select the appropriate FluidSynth driver based on the operating system
 if sys.platform == "linux" or sys.platform == "linux2":
@@ -51,7 +55,7 @@ class InstrumentRegistry:
 
         channel_info = self._fs.channel_info(available_channel)
 
-        print(f"Registered '{channel_info[3]}' (bank={bank},preset={preset}) for FluidSynth channel {available_channel} and mapped to '{instrument_name}'!")
+        logging.info(f"Registered '{channel_info[3]}' (bank={bank},preset={preset}) for FluidSynth channel {available_channel} and mapped to '{instrument_name}'!")
 
     def get_instrument(self, instrument_name):
         """Returns the FluidSynth instance and the instrument's channel."""
@@ -90,13 +94,13 @@ class InstrumentChannel:
     def play(self):
         """Starts the channel."""
         if not self._is_playing:
-            print(f"Starting channel '{self}'...")
+            logging.info(f"Starting channel '{self}'...")
             self._is_playing = True
 
     def stop(self):
         """Stops the channel."""
         if self._is_playing:
-            print(f"Pausing channel '{self}'...")
+            logging.info(f"Pausing channel '{self}'...")
             self._is_playing = False
 
     def tick(self):
@@ -115,14 +119,14 @@ class FreeMidiChannel(InstrumentChannel):
         """Starts the channel and begins receiving MIDI data."""
         super().play()  # Set the channel to "play"
         if self._is_playing:
-            print(f"Begin receiving MIDI data on channel {self._instrument_name}...")
+            logging.info(f"Begin receiving MIDI data on channel {self._instrument_name}...")
             threading.Thread(target=self._read_midi_input, daemon=True).start()
 
     def stop(self):
         """Stops the channel and ends all active notes."""
         super().stop()  # Set the channel to "stop"
         if not self._is_playing:
-            print(f"Stopping MIDI data listening on channel {self._instrument_name}...")
+            logging.info(f"Stopping MIDI data listening on channel {self._instrument_name}...")
             for note in self._active_notes:
                 self._synth.noteoff(self._channel, note)
             self._active_notes.clear()
@@ -131,19 +135,19 @@ class FreeMidiChannel(InstrumentChannel):
         """Plays a MIDI message and manages active notes."""
         if message.type == "note_on" and message.velocity > 0:
             if message.note not in self._active_notes:
-                print(f"Note on: {message.note}, Velocity: {message.velocity}")
+                logging.debug(f"Note on: {message.note}, Velocity: {message.velocity}")
                 self._synth.noteon(self._channel, message.note, message.velocity)
                 self._active_notes.add(message.note)
         elif message.type in ["note_off", "note_on"] and message.velocity == 0:
             if message.note in self._active_notes:
-                print(f"Note off: {message.note}")
+                logging.debug(f"Note off: {message.note}")
                 self._synth.noteoff(self._channel, message.note)
                 self._active_notes.remove(message.note)
 
     def _read_midi_input(self):
         """Reads MIDI inputs from a specific MIDI port and plays them."""
         with mido.open_input(self._port_name) as port:
-            print(f"Listening for MIDI input on {self._port_name}...")
+            logging.info(f"Listening for MIDI input on {self._port_name}...")
             for message in port:
                 if self._is_playing:
                     self._play_midi_message(message)
@@ -238,13 +242,13 @@ class StepChannel:
     def play(self):
         """Starts the channel."""
         if not self._is_playing:
-            print(f"Starting Step Channel {self._instrument_name}...")
+            logging.info(f"Starting Step Channel {self._instrument_name}...")
             self._is_playing = True
 
     def stop(self):
         """Stops the channel."""
         if self._is_playing:
-            print(f"Pausing Step Channel {self._instrument_name}...")
+            logging.info(f"Pausing Step Channel {self._instrument_name}...")
             self._is_playing = False
 
     def get_steps(self):
@@ -282,7 +286,7 @@ class StepSequencer:
         # Set new beat callback
         self._seq.timer(self._start_time + int(self._seconds_per_beat * 1000 * (self._cur_step + 1)), dest=self._step_callback_id)
 
-        print(f"Beat {self._cur_step} triggered: time={time}")
+        logging.info(f"Beat {self._cur_step} triggered: time={time}")
 
     def add_channel(self, channel):
         """Adds a channel to the step sequencer."""
@@ -294,7 +298,6 @@ class StepSequencer:
 
     def update(self):
         """Loads the notes of the step channels into the sequence"""
-        print(f"note_update:")
         for channel in self._channels:
             channel_steps = channel.get_steps()
             i = 0
@@ -322,7 +325,7 @@ class StepSequencer:
                         80,                    # Velocity when releasing the note
                         dest=self._synth_id    # Target Synthesizer ID
                     )
-                    print(f"  note_on({start_tick}, 0, {note}, 100), note_off({stop_tick} , 0, 80, 100)")
+                    logging.debug(f"  note_on({start_tick}, 0, {note}, 100), note_off({stop_tick} , 0, 80, 100)")
                 i = i + 1
 
     def play(self):
@@ -384,14 +387,18 @@ class Project:
 
     def play(self):
         """Starts the project and all channels."""
+        logging.info("Starting the project.")
         threading.Thread(target=self.start_ticking).start()
         for channel in self._channels:
+            logging.debug("Starting channel: %s", channel)
             channel.play()
 
     def stop(self):
         """Stops the project and all channels."""
+        logging.info("Stopping the project.")
         self._is_playing = False
         for channel in self._channels:
+            logging.debug("Stopping channel: %s", channel)
             channel.stop()
 
 # Example Usage:
