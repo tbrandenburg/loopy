@@ -3,12 +3,11 @@ import logging
 class StepChannel:
     """Abstract base class for all step channels."""
 
-    def __init__(self, parent, instrument_name, volume=80):
-        self._sequencer = parent
+    def __init__(self, instrument_name, volume=80):
         self._instrument_name = instrument_name
         self._volume = volume
         self._is_playing = False
-        self._steps = [None] * self._sequencer.get_steps()
+        self._steps = []
 
     def set_step(self, step, note, velocity):
         # If the step index is greater than the current list, extend the list with None

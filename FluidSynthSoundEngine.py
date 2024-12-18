@@ -1,14 +1,21 @@
+from ChannelInfo import ChannelInfo
+from InstrumentRegistry import DRIVER
+from SoundEngine import SoundEngine
+
+
 import fluidsynth
 
 import logging
 import threading
 
-class StepSequencer:
-    """Sequencer that plays its own step channels tick by tick"""
+PBQ = 1000
 
-    def __init__(self, synth, bpm=120, steps=32, beats_per_measure=4):
-        """Constructor"""
-        self._synth = synth
+class FluidSynthSoundEngine(SoundEngine):
+    """Concrete implementation of SoundEngine using FluidSynth."""
+
+    def __init__(self, bpm=120, beats_per_measure=4):
+        """Initialize the FluidSynth sound engine instance."""
+        self._synth = fluidsynth.Synth()
         self._seq = fluidsynth.Sequencer(time_scale=1000, use_system_timer=False)
         self._synth_id = self._seq.register_fluidsynth(self._synth)
         self._step_callback_id = self._seq.register_client("stepCallback", self._step_callback)
@@ -18,7 +25,6 @@ class StepSequencer:
         self._bpm = bpm
         self._beats_per_measure = beats_per_measure
         self._seconds_per_beat = 60 / bpm
-        self._steps = steps
         self._is_playing = False
         self._lock = threading.Lock()  # For synchronizing the tick steps
 
@@ -94,3 +100,48 @@ class StepSequencer:
 
     def stop(self):
         self._is_playing = False
+
+    def start(self):
+        """Start the FluidSynth engine with the configured driver."""
+        self._synth.start(driver=DRIVER)
+
+    def get_synth(self):
+        return self._synth
+
+    def load_soundfont(self, soundfont_path):
+        """Load a soundfont into FluidSynth.
+
+        Args:
+            soundfont_path (str): The file path to the soundfont.
+
+        Returns:
+            int: The ID of the loaded soundfont.
+        """
+        return self._synth.sfload(soundfont_path)
+
+    def select_instrument(self, channel, sfid, bank, preset):
+        """Select an instrument on the specified channel in FluidSynth.
+
+        Args:
+            channel (int): The channel number to assign the instrument.
+            sfid (int): The soundfont ID.
+            bank (int): The bank number in the soundfont.
+            preset (int): The preset number in the soundfont.
+        """
+        self._synth.program_select(channel, sfid, bank, preset)
+
+    def channel_info(self, channel):
+        """Retrieve information about a specific channel in FluidSynth.
+
+        Args:
+            channel (int): The channel number to query.
+
+        Returns:
+            ChannelInfo: Information about the channel, encapsulated in a ChannelInfo structure.
+        """
+        info = self._synth.channel_info(channel)
+        return ChannelInfo(channel=channel,
+                           soundfont_id=info[0],
+                           bank=info[1],
+                           preset=info[2],
+                           name=info[3])

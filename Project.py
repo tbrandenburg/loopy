@@ -9,8 +9,8 @@ import time
 class Project:
     """The project that manages the beat logic and controls channels."""
 
-    def __init__(self, bpm=120, beats_per_measure=4):
-        self._instrument_registry = InstrumentRegistry(self)  # Reference to the InstrumentRegistry
+    def __init__(self, soundengine, bpm=120, beats_per_measure=4):
+        self._instrument_registry = InstrumentRegistry(soundengine)  # Reference to the InstrumentRegistry
         self._bpm = bpm
         self._beats_per_measure = beats_per_measure
         self._seconds_per_beat = 60 / bpm  # Calculate seconds per beat (for the metronome)

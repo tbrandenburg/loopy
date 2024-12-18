@@ -8,9 +8,9 @@ import traceback
 
 from FreeMetronomeChannel import FreeMetronomeChannel
 from FreeMidiChannel import FreeMidiChannel
+from FluidSynthSoundEngine import FluidSynthSoundEngine
 from Project import Project
 from StepChannel import StepChannel
-from StepSequencer import StepSequencer
 from StepSequencerChannel import StepSequencerChannel
 
 # Configure logging
@@ -66,21 +66,19 @@ def start_curses_thread(project):
         render_curses(screen, project)
     threading.Thread(target=curses.wrapper, args=(curses_thread,), daemon=True).start()
 
-# Example Usage:
+# Create a FluidSynth sound engine instance
+fs_sound_engine = FluidSynthSoundEngine()
 
 # Project with BPM=120 and 4 beats per measure
-project = Project(bpm=120, beats_per_measure=4)
+project = Project(fs_sound_engine, bpm=120, beats_per_measure=4)
 
 # Register instruments
 project.get_instrument_registry().register_instrument("Piano", "sf2/GeneralUser-GS.sf2", 0, 0)
 project.get_instrument_registry().register_instrument("Jazz Guitar", "sf2/GeneralUser-GS.sf2", 0, 26)
 project.get_instrument_registry().register_instrument("Metronome", "sf2/GeneralUser-GS.sf2", 0, 115)
 
-# Create Step Sequencer
-step_sequencer = StepSequencer(project.get_instrument_registry().get_synth(), project.get_bpm(), 32, project.get_beats_per_measure())
-
 # Create Step Channel
-step_channel_1 = StepChannel(step_sequencer, "Jazz Guitar")
+step_channel_1 = StepChannel("Jazz Guitar")
 step_channel_1.set_step(0, 60, 127)
 step_channel_1.set_step(1, 61, 127)
 step_channel_1.set_step(2, 62, 127)
@@ -100,7 +98,7 @@ step_channel_1.set_step(23, 61, 127)
 step_channel_1.set_step(24, 60, 127)
 
 # Assign Step Channels
-step_sequencer.add_channel(step_channel_1)
+fs_sound_engine.add_channel(step_channel_1)
 
 # Create Instrument Channels
 for port_name in mido.get_input_names():
@@ -110,7 +108,7 @@ for port_name in mido.get_input_names():
 metronome_channel = FreeMetronomeChannel(project, "Metronome")
 project.add_channel(metronome_channel)
 
-step_sequencer_channel = StepSequencerChannel(project, step_sequencer, "Step Sequencer")
+step_sequencer_channel = StepSequencerChannel(project, "Step Sequencer")
 project.add_channel(step_sequencer_channel)
 
 # Start curses display
