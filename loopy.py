@@ -125,5 +125,11 @@ project.stop()
 # - Correct Step-Channel MIDI channel
 # - Volume Step-Channel MIDI channel
 # - Polyphonic Step-Channel MIDI channel
-# - Cool display
 # - Working stop functionality
+
+# - Refactor instrument registry place
+# - Refactor instrument channel and soundengine selection
+# - Proper SoundEngine base class
+# - get_sequencer bei StepSequencerChannel?
+# - soundengine.play() ? 
+# - self._steps = 32 ?

@@ -25,7 +25,6 @@ class InstrumentRegistry:
         self._registry = {}  # Stores information about instruments and their channels
         self._soundfont_cache = {}  # Caches loaded soundfonts (path -> sfid)
         self._sound_engine = sound_engine
-        self._sound_engine.start()  # Initialize the sound engine
 
     def register_instrument(self, instrument_name, soundfont_path, bank=0, preset=0):
         """Registers an instrument with a soundfont and assigns it to a channel.
@@ -63,15 +62,18 @@ class InstrumentRegistry:
         )
 
     def get_instrument(self, instrument_name):
-        """Retrieve details of a registered instrument.
+        """Returns the SoundEngine instance and the instrument's channel.
 
         Args:
             instrument_name (str): The name of the instrument to retrieve.
 
         Returns:
-            dict: A dictionary containing the instrument's details, or None if not found.
+            list: A list containing the SoundEngine and the instrument channel
         """
-        return self._registry.get(instrument_name, None)
+        instrument = self._registry.get(instrument_name)
+        if instrument:
+            return self._sound_engine, instrument["channel"]
+        return None, None
 
     def list_registered_instruments(self):
         """List all registered instruments.

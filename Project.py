@@ -10,6 +10,7 @@ class Project:
     """The project that manages the beat logic and controls channels."""
 
     def __init__(self, soundengine, bpm=120, beats_per_measure=4):
+        self._soundengine = soundengine
         self._instrument_registry = InstrumentRegistry(soundengine)  # Reference to the InstrumentRegistry
         self._bpm = bpm
         self._beats_per_measure = beats_per_measure
@@ -61,6 +62,7 @@ class Project:
         """Starts the project and all channels."""
         logging.debug("Starting the project.")
         threading.Thread(target=self.start_ticking).start()
+        self._soundengine.start()
         for channel in self._channels:
             logging.debug("Starting channel: %s", channel)
             channel.play()
@@ -72,3 +74,6 @@ class Project:
         for channel in self._channels:
             logging.debug("Stopping channel: %s", channel)
             channel.stop()
+
+    def get_soundengine(self):
+        return self._soundengine

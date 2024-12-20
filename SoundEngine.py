@@ -44,3 +44,38 @@ class SoundEngine(ABC):
             ChannelInfo: Information about the channel, abstracted into a ChannelInfo structure.
         """
         pass
+
+    @abstractmethod
+    def get_steps(self):
+        """Returns the number of steps of underlying step sequencer."""
+        pass
+
+    @abstractmethod
+    def add_channel(self, channel):
+        """Adds a channel to the step sequencer."""
+        pass
+
+    @abstractmethod
+    def remove_channel(self, channel):
+        """Removes a channel from the step sequencer."""
+        pass
+
+    @abstractmethod
+    def get_channels(self):
+        """Returns all step sequencer channels."""
+        pass
+
+    @abstractmethod
+    def update(self):
+        """Loads the notes of the step channels into the sequence."""
+        pass
+
+    @abstractmethod
+    def synch_noteon(self, channel, note, velocity=80):
+        """Synchronously plays a note on the specified channel."""
+        pass
+
+    @abstractmethod
+    def synch_noteoff(self, channel, note, velocity=80):
+        """Synchronously stops a note on the specified channel."""
+        pass

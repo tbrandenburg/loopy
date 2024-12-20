@@ -26,6 +26,6 @@ class FreeMetronomeChannel(InstrumentChannel):
                 velocity = self.get_volume()  # Normal volume
 
             # Play the note for the duration of seconds_per_beat
-            self._synth.noteon(self._channel, note, velocity)
+            self._synth.synch_noteon(self._channel, note, velocity)
             time.sleep(self._parent.get_seconds_per_beat())  # The duration of the note matches the length of a beat
-            self._synth.noteoff(self._channel, note)
+            self._synth.synch_noteoff(self._channel, note)

@@ -21,6 +21,8 @@ class FluidSynthSoundEngine(SoundEngine):
         self._step_callback_id = self._seq.register_client("stepCallback", self._step_callback)
 
         self._channels = []
+        
+        self._steps = 32
 
         self._bpm = bpm
         self._beats_per_measure = beats_per_measure
@@ -91,19 +93,17 @@ class FluidSynthSoundEngine(SoundEngine):
                         logging.debug(f"  note_on({start_tick}, 0, {note}, 100), note_off({stop_tick} , 0, 80, 100)")
                 i = i + 1
 
-    def play(self):
-        self._is_playing = True
-        self._start_time = self._seq.get_tick()
-        self._cur_step = 0
-        self.update()
-        self._seq.timer(self._seq.get_tick() + int(self._seconds_per_beat * 1000), dest=self._step_callback_id)
-
     def stop(self):
         self._is_playing = False
 
     def start(self):
         """Start the FluidSynth engine with the configured driver."""
         self._synth.start(driver=DRIVER)
+        self._is_playing = True
+        self._start_time = self._seq.get_tick()
+        self._cur_step = 0
+        self.update()
+        self._seq.timer(self._seq.get_tick() + int(self._seconds_per_beat * 1000), dest=self._step_callback_id)
 
     def get_synth(self):
         return self._synth
@@ -145,3 +145,9 @@ class FluidSynthSoundEngine(SoundEngine):
                            bank=info[1],
                            preset=info[2],
                            name=info[3])
+        
+    def synch_noteon(self, channel, note, velocity=80):
+        self._synth.noteon(channel, note, velocity)
+        
+    def synch_noteoff(self, channel, note, velocity=80):
+        self._synth.noteoff(channel, note)

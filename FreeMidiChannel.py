@@ -34,12 +34,12 @@ class FreeMidiChannel(InstrumentChannel):
         if message.type == "note_on" and message.velocity > 0:
             if message.note not in self._active_notes:
                 logging.debug(f"Note on: {message.note}, Velocity: {message.velocity}")
-                self._synth.noteon(self._channel, message.note, message.velocity)
+                self._synth.synch_noteon(self._channel, message.note, message.velocity)
                 self._active_notes.add(message.note)
         elif message.type in ["note_off", "note_on"] and message.velocity == 0:
             if message.note in self._active_notes:
                 logging.debug(f"Note off: {message.note}")
-                self._synth.noteoff(self._channel, message.note)
+                self._synth.synch_noteoff(self._channel, message.note)
                 self._active_notes.remove(message.note)
 
     def _read_midi_input(self):
