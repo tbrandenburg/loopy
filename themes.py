@@ -84,6 +84,26 @@ THEMES: Dict[str, Theme] = {
             "step_on": curses.A_BOLD,
         },
     ),
+    "tokyo-night": Theme(
+        key="tokyo-night",
+        display_name="Tokyo Nightfall",
+        description="Blue-forward nocturnal tones inspired by Tokyo's neon skyline.",
+        palette=[
+            ("background", (curses.COLOR_BLACK, -1)),
+            ("title", (curses.COLOR_BLUE, -1)),
+            ("channel_label", (curses.COLOR_CYAN, -1)),
+            ("step_on", (curses.COLOR_BLACK, curses.COLOR_BLUE)),
+            ("step_off", (curses.COLOR_CYAN, -1)),
+            ("grid", (curses.COLOR_MAGENTA, -1)),
+            ("meta", (curses.COLOR_WHITE, -1)),
+        ],
+        emphasis={
+            "title": curses.A_BOLD,
+            "channel_label": curses.A_BOLD,
+            "step_on": curses.A_BOLD,
+            "meta": curses.A_DIM,
+        },
+    ),
     "lofi-chill": Theme(
         key="lofi-chill",
         display_name="LoFi Chilly",

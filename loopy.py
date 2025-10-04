@@ -135,7 +135,7 @@ def parse_arguments(argv: Optional[Sequence[str]] = None):
     parser = argparse.ArgumentParser(description="Loopy MIDI sequencer")
     parser.add_argument(
         "--theme",
-        default="lofi-chill",
+        default="tokyo-night",
         choices=[theme.key for theme in iter_themes()],
         help="Select the colour theme for the interface.",
     )
