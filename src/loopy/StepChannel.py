@@ -56,4 +56,5 @@ class StepChannel:
             self._is_playing = False
 
     def get_steps(self):
+        """Return the configured steps for this channel."""
         return self._steps

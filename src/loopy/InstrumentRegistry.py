@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from SoundEngine import SoundEngine
+from .SoundEngine import SoundEngine
 
 # Select the appropriate FluidSynth driver based on the operating system
 if sys.platform == "linux" or sys.platform == "linux2":

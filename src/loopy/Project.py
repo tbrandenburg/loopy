@@ -3,8 +3,8 @@ import logging
 import threading
 import time
 
-from InstrumentRegistry import InstrumentRegistry
-from StepSequencer import StepSequencer
+from .InstrumentRegistry import InstrumentRegistry
+from .StepSequencer import StepSequencer
 
 
 class Project:

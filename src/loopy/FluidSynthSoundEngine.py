@@ -1,6 +1,6 @@
-from ChannelInfo import ChannelInfo
-from InstrumentRegistry import DRIVER
-from SoundEngine import SoundEngine
+from .ChannelInfo import ChannelInfo
+from .InstrumentRegistry import DRIVER
+from .SoundEngine import SoundEngine
 
 
 import fluidsynth

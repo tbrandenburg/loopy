@@ -7,13 +7,13 @@ from typing import List, Optional, Sequence
 
 import mido
 
-from FreeMetronomeChannel import FreeMetronomeChannel
-from FreeMidiChannel import FreeMidiChannel
-from FluidSynthSoundEngine import FluidSynthSoundEngine
-from Project import Project
-from StepChannel import StepChannel
-from StepSequencerChannel import StepSequencerChannel
-from themes import get_theme, iter_themes
+from .FreeMetronomeChannel import FreeMetronomeChannel
+from .FreeMidiChannel import FreeMidiChannel
+from .FluidSynthSoundEngine import FluidSynthSoundEngine
+from .Project import Project
+from .StepChannel import StepChannel
+from .StepSequencerChannel import StepSequencerChannel
+from .themes import get_theme, iter_themes
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

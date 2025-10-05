@@ -1,4 +1,4 @@
-from InstrumentChannel import InstrumentChannel
+from .InstrumentChannel import InstrumentChannel
 
 import threading
 

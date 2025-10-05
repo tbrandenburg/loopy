@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "loopy"
+version = "0.1.0"
+description = "Python based MIDI sequencer and looper."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Loopy Developers" }]
+license = { file = "LICENSE" }
+dependencies = [
+    "mido",
+    "python-rtmidi",
+    "pyalsaaudio; sys_platform == 'linux'",
+    "sounddevice; sys_platform == 'darwin'",
+    "windows-curses; sys_platform == 'win32'",
+    "pygame",
+    "numpy",
+    "pyfluidsynth",
+]
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/loopy"]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest",
+]

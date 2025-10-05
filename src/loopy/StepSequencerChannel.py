@@ -1,6 +1,6 @@
 import logging
 
-from InstrumentChannel import InstrumentChannel
+from .InstrumentChannel import InstrumentChannel
 
 
 class StepSequencerChannel(InstrumentChannel):
