@@ -2,6 +2,42 @@
 
 Python based MIDI sequencer and looper.
 
+## Installation
+
+Loopy needs FluidSynth and a General MIDI soundfont. Keep the instructions
+below short and sweet:
+
+### Linux (Ubuntu / Debian)
+
+```bash
+sudo apt update
+sudo apt install fluidsynth alsa-utils libasound2-dev libpulse-dev libsdl2-dev
+```
+
+Then install the Python package:
+
+```bash
+uv sync
+# or
+pip install -e .
+```
+
+### Windows 10/11
+
+1. Install FluidSynth from [the official releases](https://github.com/FluidSynth/fluidsynth/releases)
+   or via `winget install FluidSynth.FluidSynth`, and make sure `fluidsynth.exe`
+   is on your `PATH`.
+2. Install Python dependencies with `uv sync` or `pip install -e .` from a
+   terminal in the project directory.
+
+### Soundfonts
+
+Grab any General MIDI `.sf2` file (for example the
+[GeneralUser GS soundfont](https://schristiancollins.com/generaluser.php)) and
+point Loopy to its path. The repository includes
+`sf2/GeneralUser-GS2-Presets.txt` if you want a quick reference for patch
+numbers.
+
 ## Architecture overview
 
 ```mermaid
