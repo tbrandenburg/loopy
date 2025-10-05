@@ -1,8 +1,0 @@
-mido
-python-rtmidi
-pyalsaaudio; sys_platform == 'linux'
-sounddevice; sys_platform == 'darwin'
-windows-curses; sys_platform == 'win32'
-pygame
-numpy
-pyfluidsynth

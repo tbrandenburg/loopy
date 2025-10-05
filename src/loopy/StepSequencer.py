@@ -3,7 +3,7 @@ import threading
 import time
 from typing import List
 
-from StepChannel import StepChannel
+from .StepChannel import StepChannel
 
 
 class StepSequencer:
@@ -79,24 +79,32 @@ class StepSequencer:
     def _run(self):
         while not self._stop_event.is_set():
             loop_start = time.perf_counter()
-            with self._lock:
-                channels_snapshot = list(self._channels)
-                step_index = self._current_step
-                step_duration = self._step_duration
-
-            for channel in channels_snapshot:
-                try:
-                    self._play_channel_step(channel, step_index)
-                except Exception:  # pragma: no cover - defensive logging
-                    logging.exception("StepSequencer failed to play step for channel %s", channel)
-
-            with self._lock:
-                self._current_step = (self._current_step + 1) % self._steps
-
+            step_duration = self.advance_one_step()
             elapsed = time.perf_counter() - loop_start
             wait_time = max(0.0, step_duration - elapsed)
             if self._stop_event.wait(wait_time):
                 break
+
+    def advance_one_step(self) -> float:
+        """Synchronously process a single step iteration.
+
+        Returns the currently configured step duration so callers can
+        synchronise their own timing if required.
+        """
+
+        with self._lock:
+            channels_snapshot = list(self._channels)
+            step_index = self._current_step
+            self._current_step = (self._current_step + 1) % self._steps
+            step_duration = self._step_duration
+
+        for channel in channels_snapshot:
+            try:
+                self._play_channel_step(channel, step_index)
+            except Exception:  # pragma: no cover - defensive logging
+                logging.exception("StepSequencer failed to play step for channel %s", channel)
+
+        return step_duration
 
     def _play_channel_step(self, channel: StepChannel, step_index: int):
         steps = channel.get_steps()

@@ -18,5 +18,7 @@ class ChannelInfo:
         self.name = name
 
     def __repr__(self):
-        return (f"ChannelInfo(channel={self.channel}, soundfont_id={self.soundfont_id}, "
-                f"bank={self.bank}, preset={self.preset}, name='{self.name}')")
+        return (
+            f"ChannelInfo(channel={self.channel}, soundfont_id={self.soundfont_id}, "
+            f"bank={self.bank}, preset={self.preset}, name='{self.name}')"
+        )
