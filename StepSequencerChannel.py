@@ -8,7 +8,7 @@ class StepSequencerChannel(InstrumentChannel):
         
     def get_sequencer(self):
         """Returns sequencer"""
-        return self._parent.get_soundengine()
+        return self._parent.get_sequencer()
 
     def play(self):
         """Starts the channel"""
