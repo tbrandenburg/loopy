@@ -62,6 +62,31 @@ class FluidSynthSoundEngine(SoundEngine):
         """
         self._synth.program_select(channel, sfid, bank, preset)
 
+    def list_presets(self, sfid):
+        """Enumerate available presets for a loaded soundfont."""
+
+        presets = []
+
+        if not hasattr(self._synth, "sfpreset_name"):
+            return presets
+
+        # General MIDI defines 128 banks/programs; iterate defensively.
+        for bank in range(128):
+            for program in range(128):
+                try:
+                    name = self._synth.sfpreset_name(sfid, bank, program)
+                except Exception:  # pragma: no cover - backend specific behaviour
+                    name = None
+                if not name:
+                    continue
+                presets.append({
+                    "bank": bank,
+                    "preset": program,
+                    "name": name,
+                })
+
+        return presets
+
     def channel_info(self, channel):
         """Retrieve information about a specific channel in FluidSynth.
 
