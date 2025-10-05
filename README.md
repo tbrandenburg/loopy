@@ -26,6 +26,31 @@ flowchart LR
     SoundEngine -->|mixes| Output[Audio Output]
 ```
 
+## Running with uv
+
+This project is distributed as a module rather than a console script, so
+`uv run loopy` will not find an entry point. Use Python's module launcher
+instead:
+
+```bash
+uv run -- python -m loopy.loopy
+```
+
+You can pass all of the usual CLI flags, for example:
+
+```bash
+uv run -- python -m loopy.loopy --theme lofi-chill
+uv run -- python -m loopy.loopy --list-themes
+```
+
+> [!NOTE]
+> On Linux you need the ALSA development headers so that the optional
+> `pyalsaaudio` dependency can compile. Install them before running `uv run`:
+>
+> ```bash
+> sudo apt-get install libasound2-dev
+> ```
+
 ## Interface themes
 
 Loopy now supports selectable colour themes for its curses interface. Run the
