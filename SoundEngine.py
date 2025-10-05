@@ -10,6 +10,11 @@ class SoundEngine(ABC):
         pass
 
     @abstractmethod
+    def stop(self):
+        """Stop the sound engine and release any resources."""
+        pass
+
+    @abstractmethod
     def load_soundfont(self, soundfont_path):
         """Load a soundfont file into the sound engine.
 
@@ -43,31 +48,6 @@ class SoundEngine(ABC):
         Returns:
             ChannelInfo: Information about the channel, abstracted into a ChannelInfo structure.
         """
-        pass
-
-    @abstractmethod
-    def get_steps(self):
-        """Returns the number of steps of underlying step sequencer."""
-        pass
-
-    @abstractmethod
-    def add_channel(self, channel):
-        """Adds a channel to the step sequencer."""
-        pass
-
-    @abstractmethod
-    def remove_channel(self, channel):
-        """Removes a channel from the step sequencer."""
-        pass
-
-    @abstractmethod
-    def get_channels(self):
-        """Returns all step sequencer channels."""
-        pass
-
-    @abstractmethod
-    def update(self):
-        """Loads the notes of the step channels into the sequence."""
         pass
 
     @abstractmethod

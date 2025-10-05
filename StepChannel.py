@@ -31,6 +31,10 @@ class StepChannel:
         """Sets the channel's instrument based on the instrument name."""
         self._instrument_name = instrument_name
 
+    def get_instrument_name(self):
+        """Returns the channel's instrument name."""
+        return self._instrument_name
+
     def set_volume(self, volume):
         """Sets the channel's volume."""
         self._volume = volume

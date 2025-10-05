@@ -1,5 +1,7 @@
-import sys
 import logging
+import sys
+import threading
+from collections import deque
 
 from SoundEngine import SoundEngine
 
@@ -16,7 +18,7 @@ else:
 class InstrumentRegistry:
     """Manages instrument IDs and maps them to the SoundEngine."""
 
-    def __init__(self, sound_engine: SoundEngine):
+    def __init__(self, sound_engine: SoundEngine, max_channels: int = 16):
         """Initialize the instrument registry with a sound engine.
 
         Args:
@@ -25,6 +27,8 @@ class InstrumentRegistry:
         self._registry = {}  # Stores information about instruments and their channels
         self._soundfont_cache = {}  # Caches loaded soundfonts (path -> sfid)
         self._sound_engine = sound_engine
+        self._available_channels = deque(range(max_channels))
+        self._lock = threading.Lock()
 
     def register_instrument(self, instrument_name, soundfont_path, bank=0, preset=0):
         """Registers an instrument with a soundfont and assigns it to a channel.
@@ -43,23 +47,32 @@ class InstrumentRegistry:
             sfid = self._sound_engine.load_soundfont(soundfont_path)
             self._soundfont_cache[soundfont_path] = sfid
 
-        # Select the program on a new channel
-        available_channel = len(self._registry) % 16  # Simple round-robin approach
+        with self._lock:
+            if instrument_name in self._registry:
+                logging.debug("Instrument '%s' already registered.", instrument_name)
+                return self._registry[instrument_name]["channel"]
 
-        self._sound_engine.select_instrument(available_channel, sfid, bank, preset)
-        self._registry[instrument_name] = {
-            "channel": available_channel,
-            "sfid": sfid,
-            "bank": bank,
-            "preset": preset
-        }
+            if not self._available_channels:
+                raise RuntimeError("No MIDI channels available for new instruments.")
 
-        channel_info = self._sound_engine.channel_info(available_channel)
+            available_channel = self._available_channels.popleft()
 
-        logging.debug(
-            f"Registered '{channel_info.name}' (bank={bank},preset={preset}) "
-            f"for channel {available_channel} and mapped to '{instrument_name}'!"
-        )
+            self._sound_engine.select_instrument(available_channel, sfid, bank, preset)
+            self._registry[instrument_name] = {
+                "channel": available_channel,
+                "sfid": sfid,
+                "bank": bank,
+                "preset": preset
+            }
+
+            channel_info = self._sound_engine.channel_info(available_channel)
+
+            logging.debug(
+                f"Registered '{channel_info.name}' (bank={bank},preset={preset}) "
+                f"for channel {available_channel} and mapped to '{instrument_name}'!"
+            )
+
+            return available_channel
 
     def get_instrument(self, instrument_name):
         """Returns the SoundEngine instance and the instrument's channel.
@@ -74,6 +87,17 @@ class InstrumentRegistry:
         if instrument:
             return self._sound_engine, instrument["channel"]
         return None, None
+
+    def unregister_instrument(self, instrument_name):
+        """Remove an instrument and release its MIDI channel."""
+        with self._lock:
+            instrument = self._registry.pop(instrument_name, None)
+            if instrument is not None:
+                self._available_channels.append(instrument["channel"])
+
+    def get_sound_engine(self):
+        """Expose the underlying sound engine."""
+        return self._sound_engine
 
     def list_registered_instruments(self):
         """List all registered instruments.
