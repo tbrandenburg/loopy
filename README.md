@@ -28,19 +28,19 @@ flowchart LR
 
 ## Running with uv
 
-This project is distributed as a module rather than a console script, so
-`uv run loopy` will not find an entry point. Use Python's module launcher
-instead:
+Loopy now exposes a console script entry point, so you can launch it directly
+with `uv run`:
 
 ```bash
-uv run -- python -m loopy.loopy
+uv run loopy
 ```
 
-You can pass all of the usual CLI flags, for example:
+All of the CLI flags continue to work and can be passed without the additional
+`python -m` invocation:
 
 ```bash
-uv run -- python -m loopy.loopy --theme lofi-chill
-uv run -- python -m loopy.loopy --list-themes
+uv run loopy --theme lofi-chill
+uv run loopy --list-themes
 ```
 
 > [!NOTE]
