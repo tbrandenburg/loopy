@@ -24,6 +24,9 @@ dependencies = [
 [project.optional-dependencies]
 test = ["pytest"]
 
+[project.scripts]
+loopy = "loopy.loopy:main"
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/loopy"]
 
