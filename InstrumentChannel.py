@@ -12,8 +12,13 @@ class InstrumentChannel:
 
     def set_instrument(self, instrument_name):
         """Sets the channel's instrument based on the instrument name."""
+        synth, channel = self._instrument_registry.get_instrument(instrument_name)
+        if synth is None or channel is None:
+            raise KeyError(f"Instrument '{instrument_name}' is not registered.")
+
         self._instrument_name = instrument_name
-        self._synth, self._channel = self._instrument_registry.get_instrument(instrument_name)
+        self._synth = synth
+        self._channel = channel
 
     def set_volume(self, volume):
         """Sets the channel's volume."""
