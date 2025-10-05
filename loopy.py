@@ -116,7 +116,7 @@ def build_project() -> Project:
     step_channel_1.set_step(23, 61, 127)
     step_channel_1.set_step(24, 60, 127)
 
-    fs_sound_engine.add_channel(step_channel_1)
+    project.get_sequencer().add_channel(step_channel_1)
 
     for port_name in mido.get_input_names():
         fluid_midi_channel = FreeMidiChannel(project, port_name, "Piano")
