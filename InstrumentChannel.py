@@ -20,6 +20,14 @@ class InstrumentChannel:
         self._synth = synth
         self._channel = channel
 
+    def get_instrument_name(self):
+        """Return the identifier of the currently selected instrument."""
+        return self._instrument_name
+
+    def get_instrument_label(self):
+        """Return a user friendly name for the currently selected instrument."""
+        return self._instrument_registry.get_instrument_display_name(self._instrument_name)
+
     def set_volume(self, volume):
         """Sets the channel's volume."""
         self._volume = volume

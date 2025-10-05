@@ -39,6 +39,11 @@ class SoundEngine(ABC):
         pass
 
     @abstractmethod
+    def list_presets(self, sfid):
+        """Enumerate preset metadata for a loaded soundfont."""
+        pass
+
+    @abstractmethod
     def channel_info(self, channel):
         """Retrieve information about a specific channel.
 
